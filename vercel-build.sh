@@ -1,0 +1,30 @@
+
+#!/usr/bin/env bash
+set -Eeuo pipefail
+trap 'echo "GAGAL di baris $LINENO: $BASH_COMMAND"' ERR
+
+export RUSTUP_HOME=/rust
+export CARGO_HOME=/rust
+export PATH="/rust/bin:$PATH"
+
+echo "=== Rust toolchain ==="
+rustup toolchain list
+rustup show active-toolchain
+
+echo "=== Select Rust 1.95 ==="
+rustup default 1.95.0
+
+echo "=== Install WASM target ==="
+rustup target add wasm32-unknown-unknown --toolchain 1.95.0
+
+echo "=== Verify WASM target ==="
+rustup target list --installed --toolchain 1.95.0
+rustc +1.95.0 --version
+rustc +1.95.0 --print target-libdir --target wasm32-unknown-unknown
+
+echo "=== Install Trunk ==="
+cargo +1.95.0 install --locked trunk
+
+echo "=== Build Craft Launcher Web ==="
+cd apps/artcraft-launcher-web
+trunk build --release
